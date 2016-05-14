@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from contextlib import closing
-from flask import Flask, g
+from flask import Flask, jsonify, g, request
 
 
 # initialize app!
@@ -48,9 +48,17 @@ def teardown_request(exception):
         db.close()
 
 
-@app.route('/')
-def hello():
-    return 'Hello World!'
+@app.route('/api/todos', methods=['GET', 'POST'])
+def show_entries():
+    if request.method == 'POST':
+        """creates a new todo"""
+        cur = g.db.execute('insert into todos values {}'.format(request.form['text']))
+        return jsonify(status='ok')
+    else:
+        """sends all todos in the database"""
+        cur = g.db.execute('select id, text from todos')
+        entries = [dict(id=row[0], text=row[1]) for row in cur.fetchall()]
+        return jsonify(todos=entries)
 
 
 if __name__ == '__main__':
