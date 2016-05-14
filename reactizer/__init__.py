@@ -1,8 +1,8 @@
 from flask import Flask
 
 from reactizer.database import db_session
-from reactizer.modules.todos import todos
-from reactizer.modules.users import users
+from reactizer.models.todos import todos
+from reactizer.models.users import users
 
 
 # initialize app!
@@ -12,7 +12,7 @@ app.config.from_object('reactizer.config')
 app.config.from_envvar('RIZER_CONFIG', silent=True)
 
 
-# add all blueprints from modules
+# add all blueprints from models
 app.register_blueprint(todos)
 app.register_blueprint(users)
 
