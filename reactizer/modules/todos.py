@@ -21,7 +21,7 @@ todos = Blueprint('todos', __name__)
 
 
 @todos.route('/api/todos', methods=['GET', 'POST'])
-def show_entries():
+def list_add_todos():
     if request.method == 'POST':
         """creates a new todo"""
         todo = Todo(**request.get_json())

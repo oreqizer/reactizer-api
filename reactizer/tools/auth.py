@@ -15,9 +15,10 @@ def check_password(password):
         raise ValueError('auth.password.no_number')
 
     # no uppercase letter in password
-    if not search(r'\p{Lu}', password):
+    print(password)
+    if not search(r'[A-Z]', password):
         raise ValueError('auth.password.no_uppercase')
 
     # no lowercase letter in password
-    if not search(r'\p{Ll}', password):
+    if not search(r'[a-z]', password):
         raise ValueError('auth.password.no_lowercase')
