@@ -23,11 +23,11 @@ todos = Blueprint('todos', __name__)
 def show_entries():
     if request.method == 'POST':
         """creates a new todo"""
-        todo = Todo(request.form['text'])
+        todo = Todo(**request.get_json())
         db_session.add(todo)
         db_session.commit()
         return jsonify(status='ok')
     else:
         """sends all todos in the database"""
-        todos = Todo.query.all()
-        return jsonify(todos=todos)
+        results = [dict(todo) for todo in Todo.query.all()]  # TODO fix this
+        return jsonify(todos=results)
