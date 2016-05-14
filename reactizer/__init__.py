@@ -1,7 +1,7 @@
 from flask import Flask
 
 from reactizer.database import db_session
-from reactizer import modules
+from reactizer.modules.todos import todos
 
 
 # initialize app!
@@ -12,7 +12,7 @@ app.config.from_envvar('RIZER_CONFIG', silent=True)
 
 
 # add all blueprints from modules
-app.register_blueprint(modules.todos.todos)
+app.register_blueprint(todos)
 
 
 # executes after the request (no shit)

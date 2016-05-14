@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+
 from reactizer.database import Base
 
 

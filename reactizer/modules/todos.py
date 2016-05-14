@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from flask import Blueprint, request, jsonify
 
-from reactizer.database import Base
+from reactizer.database import Base, db_session
 
 
 class Todo(Base):
@@ -23,7 +23,11 @@ todos = Blueprint('todos', __name__)
 def show_entries():
     if request.method == 'POST':
         """creates a new todo"""
+        todo = Todo(request.form['text'])
+        db_session.add(todo)
+        db_session.commit()
         return jsonify(status='ok')
     else:
         """sends all todos in the database"""
-        return jsonify(todos='a lot of them')
+        todos = Todo.query.all()
+        return jsonify(todos=todos)
