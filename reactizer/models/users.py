@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 
 from reactizer.database import Base, db_session
 from reactizer.tools.mixins import DictMixin
-from reactizer.tools.auth import check_password, decode_user
+from reactizer.tools.auth import check_password, get_token
 
 
 class User(Base, DictMixin):
@@ -21,7 +21,12 @@ class User(Base, DictMixin):
         self.email = email
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User id={}, username={}>'.format(self.id, self.username)
+
+    def for_client(self):
+        to_filter = ['password']
+        selfdict = self.as_dict()
+        return {key: selfdict[key] for key in selfdict if key not in to_filter}
 
 
 users = Blueprint('users', __name__)
@@ -45,14 +50,14 @@ def register():
         user = User(**payload)
         db_session.add(user)
         db_session.commit()
+        token = get_token(user.as_dict())
+        return jsonify(status='ok', user=user.for_client(), token=token)
     except IntegrityError:
         return jsonify(status='error', msg='auth.integrity_taken')
-
-    return jsonify(status='ok')
 
 
 @users.route('/api/users')
 def show_users():
     """list all users"""
-    results = [decode_user(user.as_dict()) for user in User.query.all()]
+    results = [user.for_client() for user in User.query.all()]
     return jsonify(users=results)
