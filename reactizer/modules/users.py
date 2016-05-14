@@ -1,10 +1,11 @@
 import bcrypt
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, request, jsonify
 
 from reactizer.database import Base, db_session
 from reactizer.tools.mixins import DictMixin
-from reactizer.tools.auth import check_password
+from reactizer.tools.auth import check_password, decode_user
 
 
 class User(Base, DictMixin):
@@ -37,17 +38,21 @@ def register():
     except ValueError as err:
         return jsonify(status='error', msg=str(err))
 
-    # TODO check email/nickname availability
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(14))
     payload['password'] = hashed
-    user = User(**payload)
-    db_session.add(user)
-    db_session.commit()
+    # guards if username/email are available
+    try:
+        user = User(**payload)
+        db_session.add(user)
+        db_session.commit()
+    except IntegrityError:
+        return jsonify(status='error', msg='auth.integrity_taken')
+
     return jsonify(status='ok')
 
 
 @users.route('/api/users')
 def show_users():
     """list all users"""
-    results = [user.as_dict() for user in User.query.all()]
+    results = [decode_user(user.as_dict()) for user in User.query.all()]
     return jsonify(users=results)

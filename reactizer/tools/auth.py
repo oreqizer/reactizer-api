@@ -1,6 +1,11 @@
 from re import search
 
 
+def decode_user(entry):
+    entry['password'] = entry['password'].decode('utf-8')
+    return entry
+
+
 def check_password(password):
     # password too long
     if len(password) > 32:
