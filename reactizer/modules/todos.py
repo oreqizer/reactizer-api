@@ -2,8 +2,10 @@ from sqlalchemy import Column, Integer, String
 from flask import Blueprint, request, jsonify
 
 from reactizer.database import Base, db_session
+from reactizer.tools.as_dict import as_dict
 
 
+@as_dict
 class Todo(Base):
     __tablename__ = 'todos'
     id = Column(Integer, primary_key=True)
@@ -29,5 +31,5 @@ def show_entries():
         return jsonify(status='ok')
     else:
         """sends all todos in the database"""
-        results = [dict(todo) for todo in Todo.query.all()]  # TODO fix this
+        results = [todo.as_dict() for todo in Todo.query.all()]
         return jsonify(todos=results)
