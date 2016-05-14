@@ -1,7 +1,4 @@
-def as_dict(cls):
+class DictMixin(object):
     """allows serializing as a dict"""
-    def fn(self):
+    def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    setattr(cls, 'as_dict', fn)
-    return cls

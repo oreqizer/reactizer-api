@@ -2,11 +2,10 @@ from sqlalchemy import Column, Integer, String
 from flask import Blueprint, request, jsonify
 
 from reactizer.database import Base, db_session
-from reactizer.tools.as_dict import as_dict
+from reactizer.tools.mixins import DictMixin
 
 
-@as_dict
-class Todo(Base):
+class Todo(Base, DictMixin):
     __tablename__ = 'todos'
     id = Column(Integer, primary_key=True)
     text = Column(String(256))
