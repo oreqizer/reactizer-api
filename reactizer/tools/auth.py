@@ -1,7 +1,10 @@
 import jwt
+from functools import wraps
 from datetime import datetime, timedelta
 from re import search
-from flask import current_app
+from flask import current_app, request, Response, jsonify
+
+from reactizer.consts import roles
 
 
 def get_token(user):
@@ -12,17 +15,25 @@ def get_token(user):
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
 
-def check_token(token=None, idnum=None):
-    """checks if the given token belongs to the bearer"""
-    decoded = jwt.decode(token, current_app.config['SECRET_KEY'])
+def decode_token(token):
+    """checks if the given token is valid"""
+    return jwt.decode(token, current_app.config['SECRET_KEY'])
 
-    # checks if the token matches the supplied id
-    if decoded['iss'] != idnum:
-        raise ValueError('auth.token.unauthorized')
 
-    # checks if the token is not expired
-    if decoded['exp'] > datetime.now():
-        raise ValueError('auth.token.expired')
+def validate_token(token, role=None):
+    """validates the token, optionally with a role"""
+    # checks token presence
+    if not token:
+        raise ValueError('auth.missing_token')
+
+    decoded = decode_token(token)
+    # checks token validity
+    if decoded['exp'] < datetime.now():
+        raise ValueError('auth.token_expired')
+
+    # checks token's audience
+    if role and roles[decoded['aud']] < roles[role]:
+        raise ValueError('auth.no_privileges')
 
 
 def check_password(password):
@@ -47,3 +58,41 @@ def check_password(password):
     # no lowercase letter in password
     if not search(r'[a-z]', password):
         raise ValueError('auth.password.no_lowercase')
+
+
+# Decorators
+# ---
+
+def check_token(f):
+    """checks the presence and validity of JWT token"""
+    wraps(f)
+
+    def wrapped(*args, **kwargs):
+        payload = request.get_json()
+        try:
+            validate_token(payload['token'])
+        except ValueError as err:
+            Response(jsonify(status='error', msg=str(err)), 401)
+
+        return f(*args, **kwargs)
+
+    return wrapped
+
+
+def check_token_role(role):
+    """checks if the bearer has permission level"""
+    def decorator(f):
+        wraps(f)
+
+        def wrapped(*args, **kwargs):
+            payload = request.get_json()
+            try:
+                validate_token(payload['token'], role=role)
+            except ValueError as err:
+                Response(jsonify(status='error', msg=str(err)), 401)
+
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    return decorator
