@@ -19,5 +19,3 @@ app.register_blueprint(todos)
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
-
-
