@@ -34,3 +34,15 @@ def init_db():
 
 def clear_db():
     Base.metadata.drop_all(bind=engine)
+
+
+def init_masteruser():
+    pass
+    # pwd = auth.hash_password('hesloJ3veslo')
+    # user = User(username='oreqizer',
+    #             email='oq@hotmail.sk',
+    #             password=pwd,
+    #             role=Role.master)
+    #
+    # db_session.add(user)
+    # db_session.commit()

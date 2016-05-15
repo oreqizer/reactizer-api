@@ -71,23 +71,8 @@ def check_password(password):
 # ---
 
 
-def check_token(f):
-    """checks the presence and validity of JWT token"""
-    wraps(f)
-
-    def wrapped(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        try:
-            validate_token(token)
-        except ValueError as err:
-            return Response(str(err), 401)
-
-        return f(*args, **kwargs)
-    return wrapped
-
-
-def check_token_role(role):
-    """checks if the bearer has permission level"""
+def check_token(role=None):
+    """checks token and maybe if the bearer has permission level"""
     def decorator(f):
         wraps(f)
 
