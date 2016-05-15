@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from re import search
 from flask import current_app, request, Response
 
+from reactizer.enums import Role
+
 
 def get_token(user):
     """creates a token for the given user with 28 day duration"""
@@ -20,7 +22,7 @@ def decode_token(token):
     return jwt.decode(token, current_app.config['SECRET_KEY'])
 
 
-def validate_token(token, role=None):
+def validate_token(token, role=Role.user):
     """validates the token, optionally with a role"""
     # checks token presence
     if not token:
@@ -32,7 +34,7 @@ def validate_token(token, role=None):
         raise ValueError('auth.token_expired')
 
     # checks token's audience
-    if role and decoded['aud'] < role.value:
+    if decoded['aud'] < role.value:
         raise ValueError('auth.no_privileges')
 
 
@@ -71,7 +73,7 @@ def check_password(password):
 # ---
 
 
-def check_token(role=None):
+def check_token(role=Role.user):
     """checks token and maybe if the bearer has permission level"""
     def decorator(f):
         wraps(f)
