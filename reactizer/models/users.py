@@ -4,11 +4,11 @@ from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, request, jsonify
 
 from reactizer.database import Base, db_session
-from reactizer.tools.mixins import DictMixin
+from reactizer.tools.mixins import ModelMixin
 from reactizer.tools import auth
 
 
-class User(Base, DictMixin):
+class User(Base, ModelMixin):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True)
@@ -23,10 +23,12 @@ class User(Base, DictMixin):
     def __repr__(self):
         return '<User id={}, username={}>'.format(self.id, self.username)
 
+    def __getitem__(self, item):
+        return dict(self)[item]
+
     def for_client(self):
         to_filter = ['password']
-        selfdict = self.as_dict()
-        return {key: selfdict[key] for key in selfdict if key not in to_filter}
+        return {key: self[key] for key in dict(self) if key not in to_filter}
 
 
 users = Blueprint('users', __name__)
@@ -36,13 +38,15 @@ users = Blueprint('users', __name__)
 def login():
     """logs a user in"""
     payload = request.get_json()
-    match = User.query.filter(User.username == payload['username']).first()
-    if not match:
+    user = User.query.filter(User.username == payload['username']).first()
+    if not user:
         return 'auth.user_not_found', 401
 
-    user = match.as_dict()
     if user['password'] != auth.hash_password(payload['password'], hashed=user['password']):
         return 'auth.invalid_password', 401
+
+    token = auth.get_token(user)
+    return jsonify(user=user.for_client(), token=token)
 
 
 @users.route('/api/users/register', methods=['POST'])
@@ -71,5 +75,6 @@ def register():
 @users.route('/api/users')
 def show_users():
     """list all users"""
-    results = [user.for_client() for user in User.query.all()]
+    results = [dict(user) for user in User.query.all()]
+    print(results[0])
     return jsonify(users=results)

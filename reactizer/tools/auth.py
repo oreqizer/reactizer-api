@@ -38,8 +38,11 @@ def validate_token(token, role=None):
 
 
 def hash_password(password, hashed=None):
-    salt = hashed or bcrypt.gensalt(14)
-    return bcrypt.hashpw(password.encode('utf-8'), salt)
+    """creates a hash from the given password, and optionally a hash"""
+    # we need to encode the password for bcrypt
+    salt = hashed.encode('utf-8') or bcrypt.gensalt(14)
+    # and then decode to store it as string
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
 
 def check_password(password):

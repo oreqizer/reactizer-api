@@ -1,4 +1,5 @@
-class DictMixin(object):
-    """allows serializing as a dict"""
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}  # NOQA
+class ModelMixin(object):
+    """adds various methods all Base classes should have"""
+    def __iter__(self):
+        for column in self.__table__.columns:  # NOQA
+            yield (column.name, getattr(self, column.name))
