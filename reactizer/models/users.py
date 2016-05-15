@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify
 from reactizer.database import Base, db_session
 from reactizer.tools.mixins import ModelMixin
 from reactizer.tools import auth
+from reactizer.enums import Role
 
 
 class User(Base, ModelMixin):
@@ -14,16 +15,17 @@ class User(Base, ModelMixin):
     password = Column(String(72))
     email = Column(String(120), unique=True)
 
-    def __init__(self, username=None, password=None, email=None):
+    def __init__(self, username=None, password=None, email=None, role=None):
         self.username = username
         self.password = password
         self.email = email
+        self.role = role
 
     def __repr__(self):
         return '<User id={}, username={}>'.format(self.id, self.username)
 
     def for_client(self):
-        to_filter = ['password']
+        to_filter = ['password', 'id']
         return {key: self[key] for key in dict(self) if key not in to_filter}
 
 
@@ -31,6 +33,7 @@ users = Blueprint('users', __name__)
 
 
 @users.route('/api/users')
+@auth.check_token
 def show_users():
     """list all users"""
     results = [dict(user) for user in User.query.all()]

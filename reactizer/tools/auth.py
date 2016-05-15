@@ -3,15 +3,14 @@ import bcrypt
 from functools import wraps
 from datetime import datetime, timedelta
 from re import search
-from flask import current_app, request, Response, jsonify
-
-from reactizer.consts import roles
+from flask import current_app, request, Response
 
 
 def get_token(user):
     """creates a token for the given user with 28 day duration"""
     return jwt.encode(dict(
         iss=user['id'],
+        aud=user['role'],
         exp=datetime.now() + timedelta(days=28)
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
@@ -29,11 +28,11 @@ def validate_token(token, role=None):
 
     decoded = decode_token(token)
     # checks token validity
-    if decoded['exp'] < datetime.now():
+    if datetime.fromtimestamp(decoded['exp']) < datetime.now():
         raise ValueError('auth.token_expired')
 
     # checks token's audience
-    if role and roles[decoded['aud']] < roles[role]:
+    if role and decoded['aud'] < role.value:
         raise ValueError('auth.no_privileges')
 
 
@@ -77,14 +76,13 @@ def check_token(f):
     wraps(f)
 
     def wrapped(*args, **kwargs):
-        payload = request.get_json()
+        token = request.headers.get('Authorization')
         try:
-            validate_token(payload['token'])
+            validate_token(token)
         except ValueError as err:
-            Response(str(err), 401)
+            return Response(str(err), 401)
 
         return f(*args, **kwargs)
-
     return wrapped
 
 
@@ -98,10 +96,9 @@ def check_token_role(role):
             try:
                 validate_token(payload['token'], role=role)
             except ValueError as err:
-                Response(str(err), 401)
+                return Response(str(err), 401)
 
             return f(*args, **kwargs)
 
         return wrapped
-
     return decorator

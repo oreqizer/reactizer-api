@@ -5,7 +5,7 @@ from reactizer.models.todos import todos
 from reactizer.models.users import users
 
 
-# initialize app!
+# initialize app
 app = Flask(__name__)
 
 app.config.from_object('reactizer.config')
