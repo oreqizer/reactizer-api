@@ -14,6 +14,7 @@ class User(Base, ModelMixin):
     username = Column(String(50), unique=True)
     password = Column(String(72))
     email = Column(String(120), unique=True)
+    role = Column(Integer)
 
     def __init__(self, username=None, password=None, email=None, role=None):
         self.username = username

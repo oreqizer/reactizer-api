@@ -2,10 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-from flask import current_app
 
-
-engine = create_engine(current_app.config['DB_URI'], convert_unicode=True)
+# TODO: db from config
+engine = create_engine('sqlite:////tmp/reactizer.db', convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -38,13 +37,12 @@ def clear_db():
     Base.metadata.drop_all(bind=engine)
 
 
-def init_masteruser():
-    pass
-    # pwd = auth.hash_password('hesloJ3veslo')
-    # user = User(username='oreqizer',
-    #             email='oq@hotmail.sk',
-    #             password=pwd,
-    #             role=Role.master)
-    #
-    # db_session.add(user)
-    # db_session.commit()
+# def init_masteruser():
+#     pwd = auth.hash_password('hesloJ3veslo')
+#     user = User(username='oreqizer',
+#                 email='oq@hotmail.sk',
+#                 password=pwd,
+#                 role=Role.master.value)
+#
+#     db_session.add(user)
+#     db_session.commit()
