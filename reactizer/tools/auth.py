@@ -1,4 +1,5 @@
 import jwt
+import bcrypt
 from functools import wraps
 from datetime import datetime, timedelta
 from re import search
@@ -34,6 +35,11 @@ def validate_token(token, role=None):
     # checks token's audience
     if role and roles[decoded['aud']] < roles[role]:
         raise ValueError('auth.no_privileges')
+
+
+def hash_password(password, hashed=None):
+    salt = hashed or bcrypt.gensalt(14)
+    return bcrypt.hashpw(password.encode('utf-8'), salt)
 
 
 def check_password(password):
@@ -72,7 +78,7 @@ def check_token(f):
         try:
             validate_token(payload['token'])
         except ValueError as err:
-            Response(jsonify(status='error', msg=str(err)), 401)
+            Response(str(err), 401)
 
         return f(*args, **kwargs)
 
@@ -89,7 +95,7 @@ def check_token_role(role):
             try:
                 validate_token(payload['token'], role=role)
             except ValueError as err:
-                Response(jsonify(status='error', msg=str(err)), 401)
+                Response(str(err), 401)
 
             return f(*args, **kwargs)
 

@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 
 from reactizer.database import Base, db_session
 from reactizer.tools.mixins import DictMixin
-from reactizer.tools.auth import check_password, get_token
+from reactizer.tools import auth
 
 
 class User(Base, DictMixin):
@@ -32,6 +32,19 @@ class User(Base, DictMixin):
 users = Blueprint('users', __name__)
 
 
+@users.route('/api/users/login', methods=['POST'])
+def login():
+    """logs a user in"""
+    payload = request.get_json()
+    match = User.query.filter(User.username == payload['username']).first()
+    if not match:
+        return 'auth.user_not_found', 401
+
+    user = match.as_dict()
+    if user['password'] != auth.hash_password(payload['password'], hashed=user['password']):
+        return 'auth.invalid_password', 401
+
+
 @users.route('/api/users/register', methods=['POST'])
 def register():
     """registers a new user"""
@@ -39,21 +52,20 @@ def register():
     password = payload['password']
     # checks password validity
     try:
-        check_password(password)
+        auth.check_password(password)
     except ValueError as err:
         return jsonify(status='error', msg=str(err))
 
-    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(14))
-    payload['password'] = hashed
+    payload['password'] = auth.hash_password(password)
     # guards if username/email are available
     try:
         user = User(**payload)
         db_session.add(user)
         db_session.commit()
-        token = get_token(user.as_dict())
-        return jsonify(status='ok', user=user.for_client(), token=token)
+        token = auth.get_token(user.as_dict())
+        return jsonify(user=user.for_client(), token=token)
     except IntegrityError:
-        return jsonify(status='error', msg='auth.integrity_taken')
+        return 'auth.integrity_taken', 409
 
 
 @users.route('/api/users')
