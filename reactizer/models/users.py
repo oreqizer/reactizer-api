@@ -30,6 +30,13 @@ class User(Base, ModelMixin):
 users = Blueprint('users', __name__)
 
 
+@users.route('/api/users')
+def show_users():
+    """list all users"""
+    results = [dict(user) for user in User.query.all()]
+    return jsonify(users=results)
+
+
 @users.route('/api/users/login', methods=['POST'])
 def login():
     """logs a user in"""
@@ -67,9 +74,3 @@ def register():
     except IntegrityError:
         return 'auth.integrity_taken', 409
 
-
-@users.route('/api/users')
-def show_users():
-    """list all users"""
-    results = [dict(user) for user in User.query.all()]
-    return jsonify(users=results)

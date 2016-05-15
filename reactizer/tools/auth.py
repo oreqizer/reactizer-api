@@ -40,7 +40,7 @@ def validate_token(token, role=None):
 def hash_password(password, hashed=None):
     """creates a hash from the given password, and optionally a hash"""
     # we need to encode the password for bcrypt
-    salt = hashed.encode('utf-8') or bcrypt.gensalt(14)
+    salt = hashed.encode('utf-8') if hashed else bcrypt.gensalt(14)
     # and then decode to store it as string
     return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
@@ -60,7 +60,6 @@ def check_password(password):
         raise ValueError('auth.password.no_number')
 
     # no uppercase letter in password
-    print(password)
     if not search(r'[A-Z]', password):
         raise ValueError('auth.password.no_uppercase')
 

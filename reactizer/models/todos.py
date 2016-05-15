@@ -30,5 +30,5 @@ def list_add_todos():
         return jsonify(status='ok')
     else:
         """sends all todos in the database"""
-        results = [todo.as_dict() for todo in Todo.query.all()]
+        results = [dict(todo) for todo in Todo.query.all()]
         return jsonify(todos=results)
