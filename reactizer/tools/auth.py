@@ -69,6 +69,7 @@ def check_password(password):
 # Decorators
 # ---
 
+
 def check_token(f):
     """checks the presence and validity of JWT token"""
     wraps(f)
