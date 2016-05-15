@@ -1,4 +1,3 @@
-import bcrypt
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, request, jsonify
@@ -22,9 +21,6 @@ class User(Base, ModelMixin):
 
     def __repr__(self):
         return '<User id={}, username={}>'.format(self.id, self.username)
-
-    def __getitem__(self, item):
-        return dict(self)[item]
 
     def for_client(self):
         to_filter = ['password']
@@ -66,7 +62,7 @@ def register():
         user = User(**payload)
         db_session.add(user)
         db_session.commit()
-        token = auth.get_token(user.as_dict())
+        token = auth.get_token(user)
         return jsonify(user=user.for_client(), token=token)
     except IntegrityError:
         return 'auth.integrity_taken', 409
@@ -76,5 +72,4 @@ def register():
 def show_users():
     """list all users"""
     results = [dict(user) for user in User.query.all()]
-    print(results[0])
     return jsonify(users=results)
