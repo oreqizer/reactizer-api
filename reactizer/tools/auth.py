@@ -79,9 +79,9 @@ def check_token(role=Role.user):
         wraps(f)
 
         def wrapped(*args, **kwargs):
-            payload = request.get_json()
+            token = request.headers.get('Authentication')
             try:
-                validate_token(payload['token'], role=role)
+                validate_token(token, role=role)
             except ValueError as err:
                 return Response(str(err), 401)
 
