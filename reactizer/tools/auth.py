@@ -13,7 +13,7 @@ def get_token(user):
     return jwt.encode(dict(
         iss=user['id'],
         aud=user['role'],
-        exp=datetime.now() + timedelta(days=28)
+        exp=datetime.now() + timedelta(days=28),
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
 
