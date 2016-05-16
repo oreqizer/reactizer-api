@@ -2,9 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+from reactizer.config import DB_URI
 
-# TODO: db from config
-engine = create_engine('sqlite:////tmp/reactizer.db', convert_unicode=True)
+
+engine = create_engine(DB_URI, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
