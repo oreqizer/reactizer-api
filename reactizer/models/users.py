@@ -26,7 +26,7 @@ class User(Base, ModelMixin):
         return '<User id={}, username={}>'.format(self.id, self.username)
 
     def for_client(self):
-        to_filter = ['password', 'id']
+        to_filter = ['password', 'id', 'role']
         return {key: self[key] for key in dict(self) if key not in to_filter}
 
 
