@@ -3,6 +3,9 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from reactizer.config import DB_URI
+from reactizer.models import User
+from reactizer.tools import auth
+from reactizer.enums import Role
 
 
 engine = create_engine(DB_URI, convert_unicode=True)
@@ -13,17 +16,6 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 
 Base = declarative_base()
 Base.query = db_session.query_property()
-
-
-# TODO init master user, e.g.
-# pwd = auth.hash_password('hesloJ3veslo')
-# user = User(username='oreqizer',
-#             email='oq@hotmail.sk',
-#             password=pwd,
-#             role=Role.master)
-#
-# db_session.add(user)
-# db_session.commit()
 
 
 def init_db():
@@ -38,12 +30,12 @@ def clear_db():
     Base.metadata.drop_all(bind=engine)
 
 
-# def init_masteruser():
-#     pwd = auth.hash_password('hesloJ3veslo')
-#     user = User(username='oreqizer',
-#                 email='oq@hotmail.sk',
-#                 password=pwd,
-#                 role=Role.master.value)
-#
-#     db_session.add(user)
-#     db_session.commit()
+def init_masteruser():
+    pwd = auth.hash_password('Default1337')
+    user = User(username='oreqizer',
+                email='test@test.com',
+                password=pwd,
+                role=Role.master.value)
+
+    db_session.add(user)
+    db_session.commit()

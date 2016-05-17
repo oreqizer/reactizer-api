@@ -1,8 +1,8 @@
 from flask import Flask
 
 from reactizer.database import db_session
-from reactizer.models.todos import todos
-from reactizer.models.users import users
+from reactizer.models import todos
+from reactizer.models import users
 
 
 # initialize app
