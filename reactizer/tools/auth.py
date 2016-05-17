@@ -12,8 +12,8 @@ def get_token(user):
     """creates a token for the given user with 28 day duration"""
     return jwt.encode(dict(
         iss=user['id'],
-        aud=user['role'],
         exp=datetime.now() + timedelta(days=28),
+        _roles=user['role'],
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
 
@@ -33,8 +33,8 @@ def validate_token(token, role=Role.user):
     if datetime.fromtimestamp(decoded['exp']) < datetime.now():
         raise ValueError('auth.token_expired')
 
-    # checks token's audience
-    if decoded['aud'] < role.value:
+    # checks token's roles
+    if decoded['_roles'] < role.value:
         raise ValueError('auth.no_privileges')
 
 
@@ -73,13 +73,13 @@ def check_password(password):
 # ---
 
 
-def check_token(role=Role.user):
+def authorize(role=Role.user):
     """checks token and maybe if the bearer has permission level"""
     def decorator(f):
         wraps(f)
 
         def wrapped(*args, **kwargs):
-            token = request.headers.get('Authentication')
+            token = request.headers.get('Authorization')
             try:
                 validate_token(token, role=role)
             except ValueError as err:

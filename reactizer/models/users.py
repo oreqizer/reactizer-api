@@ -34,7 +34,7 @@ users = Blueprint('users', __name__)
 
 
 @users.route('/api/users')
-@auth.check_token(Role.admin)
+@auth.authorize(Role.admin)
 def show_users():
     """list all users"""
     results = [dict(user) for user in User.query.all()]
