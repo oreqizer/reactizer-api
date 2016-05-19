@@ -29,7 +29,7 @@ def validate_token(token, role=Role.user):
         raise ValueError('auth.token_expired')
 
     # checks token's roles
-    if token['_role'] < role.value:
+    if token['_role'] < role.value:  # TODO fix this
         raise ValueError('auth.no_privileges')
 
 

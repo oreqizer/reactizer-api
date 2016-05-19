@@ -37,21 +37,30 @@ class User(Base, ModelMixin):
 users = Blueprint('users', __name__)
 
 
-@users.route('/api/users')
-@auth.authorize(Role.admin)
-def show_users():
-    """list all users"""
-    results = [user.for_admin() for user in User.query.all()]
-    return jsonify(users=results)
-
-
 @users.route('/api/users/<user_id>')
 @auth.authorize(Role.user)
 def show_user(user_id):
     """list all users"""
     print(user_id)  # TODO check owner
     user = User.query.filter_by(id=user_id).first()
-    return jsonify(user.for_user())  # TODO serialize conidtionally, check if exists
+    return jsonify(user.for_user())  # TODO check if exists
+
+
+@users.route('/api/admin/users/<user_id>')
+@auth.authorize(Role.admin)
+def show_user_admin(user_id):
+    """list all users"""
+    print(user_id)  # TODO check owner
+    user = User.query.filter_by(id=user_id).first()
+    return jsonify(user.for_admin())  # TODO check if exists
+
+
+@users.route('/api/admin/users')
+@auth.authorize(Role.admin)
+def show_users_admin():
+    """list all users"""
+    results = [user.for_admin() for user in User.query.all()]
+    return jsonify(users=results)
 
 
 @users.route('/api/users/login', methods=['POST'])
