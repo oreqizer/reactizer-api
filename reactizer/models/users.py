@@ -50,8 +50,8 @@ def show_users():
 def show_user(user_id):
     """list all users"""
     print(user_id)  # TODO check owner
-    results = [dict(user) for user in User.query.all()]
-    return jsonify(users=results)
+    user = User.query.filter_by(id=user_id).first()
+    return jsonify(user.for_user())  # TODO serialize conidtionally, check if exists
 
 
 @users.route('/api/users/login', methods=['POST'])
