@@ -11,9 +11,9 @@ from reactizer.enums import Role
 def get_token(user):
     """creates a token for the given user with 28 day duration"""
     return jwt.encode(dict(
-        iss=user['id'],
+        iss=user.id,
         exp=datetime.now() + timedelta(days=28),
-        _roles=user['role'],
+        _role=user.role,
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
 
@@ -24,17 +24,12 @@ def decode_token(token):
 
 def validate_token(token, role=Role.user):
     """validates the token, optionally with a role"""
-    # checks token presence
-    if not token:
-        raise ValueError('auth.missing_token')
-
-    decoded = decode_token(token)
     # checks token validity
-    if datetime.fromtimestamp(decoded['exp']) < datetime.now():
+    if datetime.fromtimestamp(token['exp']) < datetime.now():
         raise ValueError('auth.token_expired')
 
     # checks token's roles
-    if decoded['_roles'] < role.value:
+    if token['_role'] < role.value:
         raise ValueError('auth.no_privileges')
 
 
@@ -76,10 +71,14 @@ def check_password(password):
 def authorize(role=Role.user):
     """checks token and maybe if the bearer has permission level"""
     def decorator(f):
-        wraps(f)
 
+        @wraps(f)
         def wrapped(*args, **kwargs):
-            token = request.headers.get('Authorization')
+            raw_token = request.headers.get('Authorization')
+            if not raw_token:
+                return Response('auth.missing_token', 401)
+
+            token = decode_token(raw_token)
             try:
                 validate_token(token, role=role)
             except ValueError as err:

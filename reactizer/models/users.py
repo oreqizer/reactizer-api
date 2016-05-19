@@ -25,8 +25,12 @@ class User(Base, ModelMixin):
     def __repr__(self):
         return '<User id={}, username={}>'.format(self.id, self.username)
 
-    def for_client(self):
+    def for_user(self):
         to_filter = ['password', 'id', 'role']
+        return {key: self[key] for key in dict(self) if key not in to_filter}
+
+    def for_admin(self):
+        to_filter = ['password']
         return {key: self[key] for key in dict(self) if key not in to_filter}
 
 
@@ -37,6 +41,15 @@ users = Blueprint('users', __name__)
 @auth.authorize(Role.admin)
 def show_users():
     """list all users"""
+    results = [user.for_admin() for user in User.query.all()]
+    return jsonify(users=results)
+
+
+@users.route('/api/users/<user_id>')
+@auth.authorize(Role.user)
+def show_user(user_id):
+    """list all users"""
+    print(user_id)  # TODO check owner
     results = [dict(user) for user in User.query.all()]
     return jsonify(users=results)
 
@@ -53,7 +66,7 @@ def login():
         return 'auth.invalid_password', 401
 
     token = auth.get_token(user)
-    return jsonify(user=user.for_client(), token=token)
+    return jsonify(user=user.for_user(), token=token)
 
 
 @users.route('/api/users/register', methods=['POST'])
@@ -74,7 +87,6 @@ def register():
         db_session.add(user)
         db_session.commit()
         token = auth.get_token(user)
-        return jsonify(user=user.for_client(), token=token)
+        return jsonify(user=user.for_user(), token=token)
     except IntegrityError:
         return 'auth.integrity_taken', 409
-
