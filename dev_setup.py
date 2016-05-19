@@ -1,7 +1,7 @@
 from reactizer.database import Base, engine, db_session
 from reactizer import models
 from reactizer.tools import auth
-from reactizer.enums import Role
+from reactizer.enums.roles import Role
 
 
 def init_db():
@@ -14,10 +14,10 @@ def clear_db():
 
 def init_masteruser():
     pwd = auth.hash_password('Default1337')
-    user = models.User(username='oreqizer',
-                       email='test@test.com',
-                       password=pwd,
-                       role=Role.master.value)
+    user = models.users.User(username='oreqizer',
+                             email='test@test.com',
+                             password=pwd,
+                             role=Role.master.value)
 
     db_session.add(user)
     db_session.commit()

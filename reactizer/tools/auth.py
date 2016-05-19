@@ -3,9 +3,9 @@ import bcrypt
 from functools import wraps
 from datetime import datetime, timedelta
 from re import search
-from flask import current_app, request, Response
+from flask import current_app, request, Response, g
 
-from reactizer.enums import Role
+from reactizer.enums.roles import Role
 
 
 def get_token(user):
@@ -79,6 +79,7 @@ def authorize(role=Role.user):
                 return Response('auth.missing_token', 401)
 
             token = decode_token(raw_token)
+            g.token = token
             try:
                 validate_token(token, role=role)
             except ValueError as err:
