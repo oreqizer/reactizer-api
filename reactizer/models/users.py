@@ -1,5 +1,6 @@
 from reactizer.database import db
 from reactizer.tools.mixins import ModelMixin
+from reactizer.enums.roles import Role
 
 
 class User(db.Model, ModelMixin):
@@ -10,10 +11,10 @@ class User(db.Model, ModelMixin):
     email = db.Column(db.String(120), unique=True)
     role = db.Column(db.Integer)
 
-    def __init__(self, username=None, password=None, email=None, role=None):
-        self.username = username
-        self.password = password
-        self.email = email
+    def __init__(self, role=Role.user.value, **kwargs):
+        self.username = kwargs['username']
+        self.password = kwargs['password']
+        self.email = kwargs['email']
         self.role = role
 
     def __repr__(self):

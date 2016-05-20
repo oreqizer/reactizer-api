@@ -5,6 +5,7 @@ PASSWORD = 'reacTizer1337'
 
 # DB stuff
 SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/reactizer.db'
+SQLALCHEMY_ECHO = True
 
 # JWT sutff
 JWT_ISS = 'reactizer'
