@@ -3,11 +3,11 @@ from reactizer.tools.mixins import ModelMixin
 from reactizer.enums.roles import Role
 
 
-class User(ModelMixin):
+class User(db.Model, ModelMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(72))
-    email = db.Column(db.String(120), unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     todos = db.relationship('Todo', backref='user')  # Todoo's foreign key
     role = db.Column(db.Integer)
 
