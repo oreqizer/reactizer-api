@@ -5,15 +5,18 @@ from datetime import datetime, timedelta
 from re import search
 from flask import current_app, request, Response, g
 
+from reactizer.models.users import User
 from reactizer.enums.roles import Role
+from reactizer.enums.auth_keys import AuthKeys
 
 
 def get_token(user):
     """creates a token for the given user with 28 day duration"""
     return jwt.encode(dict(
-        iss=user.id,
-        exp=datetime.now() + timedelta(days=28),
-        _role=user.role,
+        iss=current_app.config['JWT_ISS'],
+        sub=user.id,
+        iat=datetime.utcnow(),
+        exp=datetime.utcnow() + timedelta(hours=10),
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
 
@@ -22,46 +25,46 @@ def decode_token(token):
     return jwt.decode(token, current_app.config['SECRET_KEY'])
 
 
-def validate_token(token, role=Role.user):
+def validate_token(token, user, role=Role.user):
     """validates the token, optionally with a role"""
     # checks token validity
     if datetime.fromtimestamp(token['exp']) < datetime.now():
-        raise ValueError('auth.token_expired')
+        raise ValueError(AuthKeys.token_expired)
 
     # checks token's roles
-    if token['_role'] < role.value:  # TODO fix this
-        raise ValueError('auth.no_privileges')
+    if user.role < role.value:
+        raise ValueError(AuthKeys.no_privileges)
 
 
 def hash_password(password, hashed=None):
     """creates a hash from the given password, and optionally a hash"""
     # we need to encode the password for bcrypt
-    salt = hashed.encode('utf-8') if hashed else bcrypt.gensalt(14)
+    salt = hashed or bcrypt.gensalt(14)
     # and then decode to store it as string
-    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    return bcrypt.hashpw(password, salt)
 
 
 def check_password(password):
     """checks password's strength"""
     # password too long
     if len(password) > 32:
-        raise ValueError('auth.password.too_long')
+        raise ValueError(AuthKeys.password_long)
 
     # password too short
     if len(password) < 8:
-        raise ValueError('auth.password.too_short')
+        raise ValueError(AuthKeys.password_short)
 
     # no number in password
     if not search(r'\d', password):
-        raise ValueError('auth.password.no_number')
+        raise ValueError(AuthKeys.password_no_num)
 
     # no uppercase letter in password
     if not search(r'[A-Z]', password):
-        raise ValueError('auth.password.no_uppercase')
+        raise ValueError(AuthKeys.password_no_upper)
 
     # no lowercase letter in password
     if not search(r'[a-z]', password):
-        raise ValueError('auth.password.no_lowercase')
+        raise ValueError(AuthKeys.password_no_lower)
 
 
 # Decorators
@@ -76,15 +79,16 @@ def authorize(role=Role.user):
         def wrapped(*args, **kwargs):
             raw_token = request.headers.get('Authorization')
             if not raw_token:
-                return Response('auth.missing_token', 401)
+                return Response(AuthKeys.missing_token, 401)
 
             token = decode_token(raw_token)
-            g.token = token
+            user = User.query.get(token['sub'])
             try:
-                validate_token(token, role=role)
+                validate_token(token, user, role=role)
             except ValueError as err:
                 return Response(str(err), 401)
 
+            g.user = user
             return f(*args, **kwargs)
 
         return wrapped

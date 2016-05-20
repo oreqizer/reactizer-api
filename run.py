@@ -1,2 +1,4 @@
-from reactizer import app
+from reactizer import create_app
+
+app = create_app()
 app.run()
