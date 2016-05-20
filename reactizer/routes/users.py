@@ -72,13 +72,8 @@ def register():
 @auth.authorize(Role.admin)
 def show_user_admin(user_id):
     """:returns the requested user for admin"""
-    if not g.user:
-        return 'api.users.not_found', 404
-
-    if g.user.id != user_id:
-        return 'auth.not_owner', 401
-
-    return jsonify(g.user.for_user())
+    user = g.user if g.user.id == user_id else User.query.filter_by(id=user_id).first()
+    return jsonify(user.for_admin()) if user else 'api.users.not_found', 404
 
 
 @users.route('/api/admin/users')
