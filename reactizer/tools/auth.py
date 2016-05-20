@@ -5,15 +5,18 @@ from datetime import datetime, timedelta
 from re import search
 from flask import current_app, request, Response, g
 
+from reactizer.models.users import User
 from reactizer.enums.roles import Role
 
 
 def get_token(user):
     """creates a token for the given user with 28 day duration"""
+    print(datetime.now())
     return jwt.encode(dict(
-        iss=user.id,
-        exp=datetime.now() + timedelta(days=28),
-        _role=user.role,
+        iss=current_app.config['JWT_ISS'],
+        sub=user.id,
+        iat=datetime.now() - timedelta(hours=10),
+        exp=datetime.now() + timedelta(hours=10),
     ), current_app.config['SECRET_KEY']).decode('utf-8')
 
 
@@ -22,23 +25,23 @@ def decode_token(token):
     return jwt.decode(token, current_app.config['SECRET_KEY'])
 
 
-def validate_token(token, role=Role.user):
+def validate_token(token, user, role=Role.user):
     """validates the token, optionally with a role"""
     # checks token validity
     if datetime.fromtimestamp(token['exp']) < datetime.now():
         raise ValueError('auth.token_expired')
 
     # checks token's roles
-    if token['_role'] < role.value:  # TODO fix this
+    if user.role < role.value:
         raise ValueError('auth.no_privileges')
 
 
 def hash_password(password, hashed=None):
     """creates a hash from the given password, and optionally a hash"""
     # we need to encode the password for bcrypt
-    salt = hashed.encode('utf-8') if hashed else bcrypt.gensalt(14)
+    salt = hashed or bcrypt.gensalt(14)
     # and then decode to store it as string
-    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    return bcrypt.hashpw(password, salt)
 
 
 def check_password(password):
@@ -79,12 +82,13 @@ def authorize(role=Role.user):
                 return Response('auth.missing_token', 401)
 
             token = decode_token(raw_token)
-            g.token = token
+            user = User.query.filter_by(id=token['sub']).first()
             try:
-                validate_token(token, role=role)
+                validate_token(token, user, role=role)
             except ValueError as err:
                 return Response(str(err), 401)
 
+            g.user = user
             return f(*args, **kwargs)
 
         return wrapped
