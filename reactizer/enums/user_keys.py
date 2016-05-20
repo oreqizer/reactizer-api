@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class UsersKeys(Enum):
+class UserKeys(Enum):
     not_found = 'users.not_found'
 
     def __str__(self):

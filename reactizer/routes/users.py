@@ -5,18 +5,18 @@ from reactizer.database import db
 from reactizer.models.users import User
 from reactizer.tools import auth
 from reactizer.enums.roles import Role
-from reactizer.enums.users_keys import UsersKeys
+from reactizer.enums.user_keys import UserKeys
 from reactizer.enums.auth_keys import AuthKeys
 
 users = Blueprint('users', __name__)
 
 
 @users.route('/api/users/<int:user_id>')
-@auth.authorize(Role.user)
+@auth.authorize()
 def show_user(user_id):
     """:returns the requested user"""
     if not g.user:
-        return str(UsersKeys.not_found), 404
+        return str(UserKeys.not_found), 404
 
     if g.user.id != user_id:
         return str(AuthKeys.not_owner), 401
@@ -76,7 +76,7 @@ def register():
 def show_user_admin(user_id):
     """:returns the requested user for admin"""
     user = g.user if g.user.id == user_id else User.query.filter_by(id=user_id).first()
-    return jsonify(user.for_admin()) if user else str(UsersKeys.not_found), 404
+    return jsonify(user.for_admin()) if user else str(UserKeys.not_found), 404
 
 
 @users.route('/api/admin/users')

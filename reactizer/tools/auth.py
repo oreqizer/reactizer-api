@@ -82,7 +82,7 @@ def authorize(role=Role.user):
                 return Response(AuthKeys.missing_token, 401)
 
             token = decode_token(raw_token)
-            user = User.query.filter_by(id=token['sub']).first()
+            user = User.query.get(token['sub'])
             try:
                 validate_token(token, user, role=role)
             except ValueError as err:

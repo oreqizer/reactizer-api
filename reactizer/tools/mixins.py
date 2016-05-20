@@ -1,7 +1,10 @@
-class ModelMixin(object):
+from reactizer.database import db
+
+
+class ModelMixin(db.Model):
     """adds methods all Base classes should have"""
     def __iter__(self):
-        for column in self.__table__.columns:  # NOQA
+        for column in self.__table__.columns:
             yield (column.name, getattr(self, column.name))
 
     def __getitem__(self, item):
