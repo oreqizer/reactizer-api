@@ -1,9 +1,8 @@
+import bcrypt
+import jwt
 from datetime import datetime, timedelta
 from functools import wraps
 from re import search
-
-import bcrypt
-import jwt
 from flask import current_app, request, Response, g
 
 from reactizer.enums.roles import Role
