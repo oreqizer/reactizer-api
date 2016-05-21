@@ -65,23 +65,3 @@ def register():
         return jsonify(user=user.for_user(), token=token)
     except IntegrityError:
         return str(AuthKeys.integrity_taken), 409
-
-
-# Admin routes
-# ---
-
-
-@users.route('/api/admin/users/<int:user_id>')
-@auth.authorize(Role.admin)
-def show_user_admin(user_id):
-    """:returns the requested user for admin"""
-    user = g.user if g.user.id == user_id else User.query.get(user_id)
-    return jsonify(user.for_admin()) if user else str(UserKeys.not_found), 404
-
-
-@users.route('/api/admin/users')
-@auth.authorize(Role.admin)
-def show_users_admin():
-    """:returns all users"""
-    results = [user.for_admin() for user in User.query.all()]
-    return jsonify(users=results)
