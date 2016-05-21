@@ -78,7 +78,7 @@ def authorize(role=Role.user):
         def wrapped(*args, **kwargs):
             raw_token = request.headers.get('Authorization')
             if not raw_token:
-                return Response(AuthKeys.missing_token, 401)
+                return Response(str(AuthKeys.missing_token), 401)
 
             token = decode_token(raw_token)
             user = User.query.get(token['sub'])
