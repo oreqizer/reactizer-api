@@ -1,10 +1,8 @@
-from flask import Blueprint, request, jsonify, g
-from reactizer.enums.auth_keys import AuthKeys
+from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 
 from reactizer.database import db
-from reactizer.enums.roles import Role
-from reactizer.keys.user import UserKeys
+from reactizer.keys.auth import AuthKeys
 from reactizer.models.user import User
 from reactizer.tools import auth
 

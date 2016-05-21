@@ -4,7 +4,7 @@ USERNAME = 'admin'
 PASSWORD = 'reacTizer1337'
 
 # DB stuff
-SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/reactizer.db'
+SQLALCHEMY_DATABASE_URI = 'postgres://oreqizer@localhost/reactizer'
 SQLALCHEMY_ECHO = True
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
