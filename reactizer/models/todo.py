@@ -1,6 +1,6 @@
 from reactizer.database import db
+from reactizer.keys.db import DbKeys
 from reactizer.tools.mixins import ModelMixin
-from reactizer.enums.db_keys import DbKeys
 
 
 class Todo(db.Model, ModelMixin):

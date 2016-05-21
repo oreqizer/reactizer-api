@@ -1,13 +1,14 @@
-import jwt
-import bcrypt
-from functools import wraps
 from datetime import datetime, timedelta
+from functools import wraps
 from re import search
+
+import bcrypt
+import jwt
 from flask import current_app, request, Response, g
 
-from reactizer.models.users import User
 from reactizer.enums.roles import Role
-from reactizer.enums.auth_keys import AuthKeys
+from reactizer.keys.auth import AuthKeys
+from reactizer.models.user import User
 
 
 def get_token(user):

@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify, g
 
 from reactizer.database import db
-from reactizer.models.todos import Todo
+from reactizer.keys.todo import TodoKeys
+from reactizer.models.todo import Todo
 from reactizer.tools import auth
-from reactizer.enums.todo_keys import TodoKeys
 
 todos = Blueprint('todos', __name__)
 

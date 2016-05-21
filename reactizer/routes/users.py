@@ -1,12 +1,12 @@
-from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, request, jsonify, g
+from reactizer.enums.auth_keys import AuthKeys
+from sqlalchemy.exc import IntegrityError
 
 from reactizer.database import db
-from reactizer.models.users import User
-from reactizer.tools import auth
 from reactizer.enums.roles import Role
-from reactizer.enums.user_keys import UserKeys
-from reactizer.enums.auth_keys import AuthKeys
+from reactizer.keys.user import UserKeys
+from reactizer.models.user import User
+from reactizer.tools import auth
 
 users = Blueprint('users', __name__)
 

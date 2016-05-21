@@ -13,10 +13,10 @@ if __name__ == "__main__":
         db.drop_all()
         db.create_all()
         pwd = auth.hash_password('Default1337')
-        user = models.users.User(username='oreqizer',
-                                 email='test@test.com',
-                                 password=pwd,
-                                 role=Role.master.value)
+        user = models.user.User(username='oreqizer',
+                                email='test@test.com',
+                                password=pwd,
+                                role=Role.master.value)
 
         db.session.add(user)
         db.session.commit()
