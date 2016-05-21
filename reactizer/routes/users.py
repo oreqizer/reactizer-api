@@ -11,19 +11,6 @@ from reactizer.tools import auth
 users = Blueprint('users', __name__)
 
 
-@users.route('/api/users/<int:user_id>')
-@auth.authorize()
-def show_user(user_id):
-    """:returns the requested user"""
-    if not g.user:
-        return str(UserKeys.not_found), 404
-
-    if g.user.id != user_id:
-        return str(AuthKeys.not_owner), 401
-
-    return jsonify(g.user.for_user())
-
-
 @users.route('/api/users/login', methods=['POST'])
 def login():
     """logs a user in.
