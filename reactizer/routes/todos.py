@@ -16,7 +16,7 @@ def list_or_add():
         todo = Todo(**request.get_json(), user=g.user)
         db.session.add(todo)
         db.session.commit()
-        return jsonify(status='ok')
+        return jsonify(todo)
     else:
         """sends all todos in the database"""
         results = [dict(todo) for
@@ -42,7 +42,7 @@ def manipulate(todo_id):
             todo[key] = changes[key]
 
         db.session.commit()
-        return jsonify(status='ok')
+        return jsonify(todo)
     else:
         db.session.delete(todo)
         db.session.commit()
