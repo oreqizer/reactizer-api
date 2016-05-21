@@ -38,7 +38,7 @@ def register():
     try:
         auth.check_password(password)
     except ValueError as err:
-        return jsonify(status='error', msg=str(err))
+        return str(err), 409
 
     payload['password'] = auth.hash_password(password)
     # guards if username/email are available
