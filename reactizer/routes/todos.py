@@ -19,7 +19,9 @@ def list_or_add():
         return jsonify(status='ok')
     else:
         """sends all todos in the database"""
-        results = [dict(todo) for todo in Todo.query.filter_by(user_id=g.user.id)]
+        results = [dict(todo) for
+                   todo in
+                   Todo.query.filter_by(user_id=g.user.id)]
         return jsonify(todos=results)
 
 

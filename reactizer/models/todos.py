@@ -23,4 +23,3 @@ class Todo(db.Model, ModelMixin):
 
     def __repr__(self):
         return '<Todo: %r>' % self.text
-

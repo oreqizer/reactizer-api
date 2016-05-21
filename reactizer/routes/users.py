@@ -75,7 +75,7 @@ def register():
 @auth.authorize(Role.admin)
 def show_user_admin(user_id):
     """:returns the requested user for admin"""
-    user = g.user if g.user.id == user_id else User.query.filter_by(id=user_id).first()
+    user = g.user if g.user.id == user_id else User.query.get(user_id)
     return jsonify(user.for_admin()) if user else str(UserKeys.not_found), 404
 
 
