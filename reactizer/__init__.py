@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 
 from reactizer.database import db
@@ -11,6 +12,11 @@ def create_app():
     # config
     app.config.from_object('reactizer.config')
     app.config.from_envvar('RIZER_CONFIG', silent=True)
+
+    # Heroku
+    db_url = os.environ['DATABASE_URL']
+    if db_url:
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
     # add all blueprints from models
     app.register_blueprint(todos)
