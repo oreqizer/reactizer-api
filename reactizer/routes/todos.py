@@ -26,6 +26,7 @@ def list_or_add():
 @todos.route('/api/todos/<int:todo_id>', methods=['PUT', 'DELETE'])
 @auth.authorize()
 def manipulate(todo_id):
+    """updates or deletes a todo"""
     todo = Todo.query.get(todo_id)
     if not todo:
         return str(TodoKeys.not_found), 404
@@ -34,7 +35,6 @@ def manipulate(todo_id):
         return str(TodoKeys.not_owner), 401
 
     if request.method == 'PUT':
-        """updates a todo"""
         changes = request.get_json()
         for key in changes:
             todo[key] = changes[key]
@@ -42,7 +42,6 @@ def manipulate(todo_id):
         db.session.commit()
         return jsonify(status='ok')
     else:
-        """deletes a todo"""
         db.session.delete(todo)
         db.session.commit()
         return jsonify(status='ok')
