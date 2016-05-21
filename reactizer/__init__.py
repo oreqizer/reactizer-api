@@ -14,7 +14,7 @@ def create_app():
     app.config.from_envvar('RIZER_CONFIG', silent=True)
 
     # Heroku
-    db_url = os.environ['DATABASE_URL']
+    db_url = os.environ.get('DATABASE_URL')
     if db_url:
         app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
