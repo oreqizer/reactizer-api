@@ -11,18 +11,16 @@ todos = Blueprint('todos', __name__)
 @todos.route('/api/todos', methods=['GET', 'POST'])
 @auth.authorize()
 def list_or_add():
+    """created a new Todo, or lists all user's ones"""
     if request.method == 'POST':
-        """creates a new todo"""
         todo = Todo(**request.get_json(), user=g.user)
         db.session.add(todo)
         db.session.commit()
-        return jsonify(status='ok')
+        return jsonify(todo)
     else:
-        """sends all todos in the database"""
-        results = [dict(todo) for
-                   todo in
-                   Todo.query.filter_by(user_id=g.user.id)]
-        return jsonify(todos=results)
+        todo_list = Todo.query.filter_by(user_id=g.user.id)
+        todo_map = {todo.id: dict(todo) for todo in todo_list}
+        return jsonify(todo_map)
 
 
 @todos.route('/api/todos/<int:todo_id>', methods=['PUT', 'DELETE'])
@@ -42,7 +40,7 @@ def manipulate(todo_id):
             todo[key] = changes[key]
 
         db.session.commit()
-        return jsonify(status='ok')
+        return jsonify(todo)
     else:
         db.session.delete(todo)
         db.session.commit()
