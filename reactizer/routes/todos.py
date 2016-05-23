@@ -19,8 +19,8 @@ def list_or_add():
         return jsonify(todo)
     else:
         todo_list = Todo.query.filter_by(user_id=g.user.id)
-        todo_map = {todo.id: dict(todo) for todo in todo_list}
-        return jsonify(todo_map)
+        results = [dict(todo) for todo in todo_list]
+        return jsonify(todos=results)
 
 
 @todos.route('/api/todos/<int:todo_id>', methods=['PUT', 'DELETE'])
