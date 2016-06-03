@@ -1,9 +1,11 @@
+from uuid import uuid4
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 
 from reactizer.database import db
 from reactizer.keys.auth import AuthKeys
 from reactizer.models.user import User
+from reactizer.models.refresh_token import RefreshToken
 from reactizer.tools import auth
 
 users = Blueprint('users', __name__)
@@ -23,8 +25,34 @@ def login():
     if user['password'] != pw_hash:
         return str(AuthKeys.invalid_password), 401
 
+    app = payload['app']
     token = auth.get_token(user)
-    return jsonify(user=user.for_user(), token=token)
+    refresh_token = RefreshToken.query.filter_by(app=app, user_id=user.id).first()
+    if not refresh_token:
+        refresh_token = RefreshToken(user=user, app=app, token=uuid4())
+        db.session.add(refresh_token)
+        db.session.commit()
+
+    return jsonify(user=user.for_user(),
+                   token=token,
+                   refresh_token=refresh_token.token)
+
+
+@users.route('/api/users/refresh', methods=['POST'])
+def refresh():
+    """logs a user in using the refresh token.
+    :returns the user info and user's token
+    """
+    payload = request.get_json()
+    refresh_token = RefreshToken.query.filter_by(token=payload['refresh_token']).first()
+    if not refresh_token:
+        return str(AuthKeys.no_such_user), 401
+
+    user = User.query.get(refresh_token.user_id)
+    token = auth.get_token(user)
+    return jsonify(user=user.for_user(),
+                   token=token,
+                   refresh_token=refresh_token.token)
 
 
 @users.route('/api/users/register', methods=['POST'])
@@ -46,7 +74,14 @@ def register():
         user = User(**payload)
         db.session.add(user)
         db.session.commit()
+
+        refresh_token = RefreshToken(user=user, app=payload['app'], token=uuid4())
+        db.session.add(refresh_token)
+        db.session.commit()
+
         token = auth.get_token(user)
-        return jsonify(user=user.for_user(), token=token)
+        return jsonify(user=user.for_user(),
+                       token=token,
+                       refresh_token=refresh_token.token)
     except IntegrityError:
         return str(AuthKeys.integrity_taken), 409

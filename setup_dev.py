@@ -16,6 +16,7 @@ if __name__ == "__main__":
         user = models.user.User(username='oreqizer',
                                 email='test@test.com',
                                 password=pwd,
+                                app='demo',
                                 role=Role.master.value)
 
         db.session.add(user)

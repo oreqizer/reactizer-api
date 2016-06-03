@@ -5,8 +5,8 @@ from reactizer.tools.mixins import ModelMixin
 
 class Todo(db.Model, ModelMixin):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    text = db.Column(db.String(256))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    text = db.Column(db.String(256), nullable=False)
     done = db.Column(db.Boolean, nullable=False)
 
     def __setattr__(self, key, value):
