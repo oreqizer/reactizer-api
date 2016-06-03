@@ -9,7 +9,7 @@ class User(db.Model, ModelMixin):
     password = db.Column(db.String(72))
     email = db.Column(db.String(120), unique=True, nullable=False)
     todos = db.relationship('Todo', backref='user')
-    refresh_tokens = db.relationship('RefreshToken', backref='refresh_token')
+    refresh_tokens = db.relationship('RefreshToken', backref='user')
     role = db.Column(db.Integer)
 
     def __init__(self, role=Role.user.value, **kwargs):
