@@ -10,3 +10,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # JWT sutff
 JWT_ISS = os.environ.get('JWT_ISS') or 'reactizer'
+
+# Babel
+BABEL_DEFAULT_LOCALE = 'en'
+BABEL_DEFAULT_TIMEZONE = 'UTC'
