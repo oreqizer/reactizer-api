@@ -19,7 +19,7 @@ def list_or_add():
         return jsonify(todo)
     else:
         todo_list = Todo.query.filter_by(user_id=g.user.id)
-        results = sorted([dict(todo) for todo in todo_list])
+        results = [dict(todo) for todo in todo_list]
         return jsonify(todos=results)
 
 
