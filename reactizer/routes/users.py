@@ -1,3 +1,4 @@
+from uuid import uuid4
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 
@@ -25,8 +26,14 @@ def login():
         return str(AuthKeys.invalid_password), 401
 
     token = auth.get_token(user)
-    # TODO: also send refresh_token
-    return jsonify(user=user.for_user(), token=token)
+    refresh_token = RefreshToken(user=user, app=payload['app'], token=uuid4())
+
+    db.session.add(refresh_token)
+    db.session.commit()
+
+    return jsonify(user=user.for_user(),
+                   token=token,
+                   refresh_token=refresh_token.token)
 
 
 @users.route('/api/users/register', methods=['POST'])
@@ -46,10 +53,16 @@ def register():
     # guards if username/email are available
     try:
         user = User(**payload)
-        # TODO: generate and store/send refresh token
         db.session.add(user)
         db.session.commit()
+
+        refresh_token = RefreshToken(user=user, app=payload['app'], token=uuid4())
+        db.session.add(refresh_token)
+        db.session.commit()
+
         token = auth.get_token(user)
-        return jsonify(user=user.for_user(), token=token)
+        return jsonify(user=user.for_user(),
+                       token=token,
+                       refresh_token=refresh_token.token)
     except IntegrityError:
         return str(AuthKeys.integrity_taken), 409

@@ -8,7 +8,8 @@ class User(db.Model, ModelMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(72))
     email = db.Column(db.String(120), unique=True, nullable=False)
-    todos = db.relationship('Todo', backref='user')  # Todoo's foreign key
+    todos = db.relationship('Todo', backref='user')
+    refresh_tokens = db.relationship('RefreshToken', backref='refresh_token')
     role = db.Column(db.Integer)
 
     def __init__(self, role=Role.user.value, **kwargs):

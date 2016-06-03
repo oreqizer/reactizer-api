@@ -4,7 +4,7 @@ from reactizer.tools.mixins import ModelMixin
 
 class RefreshToken(db.Model, ModelMixin):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     app = db.Column(db.String(50), nullable=False)
     token = db.Column(db.String(72), nullable=False)
 
@@ -14,4 +14,4 @@ class RefreshToken(db.Model, ModelMixin):
         self.token = kwargs['token']
 
     def __repr__(self):
-        return '<Token: %r>' % self.text
+        return '<Token: %r, app: %r, owner: %r>' % (self.token, self.app, self.user_id)
