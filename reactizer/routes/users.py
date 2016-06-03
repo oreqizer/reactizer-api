@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from reactizer.database import db
 from reactizer.keys.auth import AuthKeys
 from reactizer.models.user import User
+from reactizer.models.refresh_token import RefreshToken
 from reactizer.tools import auth
 
 users = Blueprint('users', __name__)
@@ -24,6 +25,7 @@ def login():
         return str(AuthKeys.invalid_password), 401
 
     token = auth.get_token(user)
+    # TODO: also send refresh_token
     return jsonify(user=user.for_user(), token=token)
 
 
@@ -44,6 +46,7 @@ def register():
     # guards if username/email are available
     try:
         user = User(**payload)
+        # TODO: generate and store/send refresh token
         db.session.add(user)
         db.session.commit()
         token = auth.get_token(user)
