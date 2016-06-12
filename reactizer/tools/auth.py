@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 from functools import wraps
 from re import search
 from flask import current_app, request, Response, g
+from flask_babel import gettext
 
 from reactizer.enums.roles import Role
-from reactizer.keys.auth import AuthKeys
 from reactizer.models.user import User
 
 
@@ -25,15 +25,11 @@ def decode_token(token):
     return jwt.decode(token, current_app.config['SECRET_KEY'])
 
 
-def validate_token(token, user, role=Role.user):
+def validate_user(user, role=Role.user):
     """validates the token, optionally with a role"""
-    # checks token validity
-    if datetime.fromtimestamp(token['exp']) < datetime.now():
-        raise ValueError(AuthKeys.token_expired)
-
     # checks token's roles
     if user.role < role.value:
-        raise ValueError(AuthKeys.no_privileges)
+        raise ValueError(gettext('No privileges.'))
 
 
 def hash_password(password, hashed=None):
@@ -46,23 +42,29 @@ def check_password(password):
     """checks password's strength"""
     # password too long
     if len(password) > 32:
-        raise ValueError(AuthKeys.password_long)
+        raise ValueError(gettext('Password too long.'))
 
     # password too short
     if len(password) < 8:
-        raise ValueError(AuthKeys.password_short)
+        raise ValueError(gettext('Password too short.'))
 
     # no number in password
     if not search(r'\d', password):
-        raise ValueError(AuthKeys.password_no_num)
+        raise ValueError(gettext(
+            'Password has to contain a number.'
+        ))
 
     # no uppercase letter in password
     if not search(r'[A-Z]', password):
-        raise ValueError(AuthKeys.password_no_upper)
+        raise ValueError(gettext(
+            'Password has to contain an uppercase letter.'
+        ))
 
     # no lowercase letter in password
     if not search(r'[a-z]', password):
-        raise ValueError(AuthKeys.password_no_lower)
+        raise ValueError(gettext(
+            'Password has to contain a lowercase letter.'
+        ))
 
 
 # Decorators
@@ -77,12 +79,14 @@ def authorize(role=Role.user):
         def wrapped(*args, **kwargs):
             raw_token = request.headers.get('Authorization')
             if not raw_token:
-                return Response(str(AuthKeys.missing_token), 401)
+                return Response(gettext(
+                    'No token in "Authorization" header.'
+                ), 401)
 
             token = decode_token(raw_token)
             user = User.query.get(token['sub'])
             try:
-                validate_token(token, user, role=role)
+                validate_user(user, role=role)
             except ValueError as err:
                 return Response(str(err), 401)
 
