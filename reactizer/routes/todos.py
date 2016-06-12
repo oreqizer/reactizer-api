@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, g
+from flask_babel import gettext
 
 from reactizer.database import db
-from reactizer.keys.todo import TodoKeys
 from reactizer.models.todo import Todo
 from reactizer.tools import auth
 
@@ -29,10 +29,10 @@ def manipulate(todo_id):
     """updates or deletes a todo"""
     todo = Todo.query.get(todo_id)
     if not todo:
-        return str(TodoKeys.not_found), 404
+        return gettext('No such todo.'), 404
 
     if todo.user_id != g.user.id:
-        return str(TodoKeys.not_owner), 401
+        return gettext('This todo doesn\'t belong to you.'), 401
 
     if request.method == 'PUT':
         changes = request.get_json()

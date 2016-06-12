@@ -1,5 +1,6 @@
+from flask_babel import gettext
+
 from reactizer.database import db
-from reactizer.keys.db import DbKeys
 from reactizer.tools.mixins import ModelMixin
 
 
@@ -12,7 +13,7 @@ class Todo(db.Model, ModelMixin):
     def __setattr__(self, key, value):
         protected = ['id', 'user_id']
         if key in protected:
-            raise KeyError(str(DbKeys.protected_key))
+            raise KeyError(gettext('Cannot set this key on a todo.'))
 
         super().__setattr__(key, value)
 

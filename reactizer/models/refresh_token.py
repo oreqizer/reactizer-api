@@ -14,4 +14,5 @@ class RefreshToken(db.Model, ModelMixin):
         self.token = kwargs['token']
 
     def __repr__(self):
-        return '<Token: %r, app: %r, owner: %r>' % (self.token, self.app, self.user_id)
+        return '<Token: %r, app: %r, owner: %r>' %\
+               (self.token, self.app, self.user_id)
